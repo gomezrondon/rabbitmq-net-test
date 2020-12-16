@@ -1,10 +1,11 @@
 ﻿using System.Text;
+using System.Threading;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 
 namespace RrabbitMQ.Producer
 {
-    public class QueueProducer
+    public static class QueueProducer
     {
         public static void Publisher(IModel channel)
         {
@@ -14,10 +15,19 @@ namespace RrabbitMQ.Producer
                 exclusive: false,
                 autoDelete: false,
                 arguments: null);
-            var message = new {Name = "Producer", Message = "Hello!"};
-            var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
-            
-            channel.BasicPublish("","demo-queue",null, body);
+
+            var count = 0;
+
+            while (true)
+            {
+                var message = new {Name = "Producer", Message = $"Hello! Count: {count}"};
+                var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
+
+                channel.BasicPublish("", "demo-queue", null, body);
+                count++;
+                Thread.Sleep(1000);
+            }
+
         }
     }
 }
